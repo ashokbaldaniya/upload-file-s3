@@ -1,0 +1,39 @@
+service: my-wetransfer-clone
+provider:
+  name: aws
+  runtime: nodejs20.x
+  versionFunctions: false
+  deploymentMethod: direct 
+  region: us-east-1
+  profile: Ashok
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+      Resource: arn:aws:s3:::fileuploadtransfer/*
+
+package:
+  excludeDevDependencies: true
+
+functions:
+  generateBulkDownloadUrls:
+    handler: handler.generateBulkDownloadUrls
+    events:
+      - http:
+          path: generateBulkDownloadUrls
+          method: post
+          cors: true
+    package:
+      include:
+        - /handler.mjs
+      exclude:
+        - "**/*"
+resources:
+  Resources:
+    UploadBucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: fileuploadtransfer
+plugins:
+  - serverless-offline
